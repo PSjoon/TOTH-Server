@@ -4,8 +4,8 @@
   "description": "TCC TOTH",
   "main": "index.js",
   "scripts": {
-    "dev": "tsx ./src/server.ts",
-    "build": "tsup src",
+    "dev": "tsx watch ./api/index.ts",
+    "build": "tsup api",
     "start": "node dist/server.js"
   },
   "repository": {

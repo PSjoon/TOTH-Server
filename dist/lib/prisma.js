@@ -17,7 +17,7 @@ var __copyProps = (to, from, except, desc) => {
 };
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
-// src/lib/prisma.ts
+// api/lib/prisma.ts
 var prisma_exports = {};
 __export(prisma_exports, {
   prisma: () => prisma
