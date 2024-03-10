@@ -1,0 +1,136 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  college         String[]
+  communityMember String[]
+  email           String   @unique
+
+  emailNotify  Boolean
+  promoNotify  Boolean
+  likeNotify   Boolean
+  followNotify Boolean
+  postNotify   Boolean
+
+  github          String
+  githubId        Int      @unique
+  lattes          String
+  linkedin        String
+  nickname        String
+  password        String
+  profilePictures String
+  savedPosts      String[]
+  seguidores      String[]
+  username        String
+
+  Artigo     Artigo[]
+  CommentOne CommentOne[]
+  CommentTwo CommentTwo[]
+  Comunidade Comunidade[]
+  Post       Post[]
+  PostOne    PostOne[]
+  PostTwo    PostTwo[]
+}
+
+model Artigo {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  dateCreated DateTime @db.Date
+  photo       String
+  reaction    Int
+  text        String
+  title       String
+  scielo      String
+  file        String
+  strike      Int
+
+  by         String       @db.ObjectId
+  usuario    Usuario      @relation(fields: [by], references: [id])
+  CommentOne CommentOne[]
+}
+
+model CommentOne {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  dateCreated DateTime @db.Date
+  message     String
+  reaction    Int
+  strike      Int
+
+  by         String       @db.ObjectId
+  usuario    Usuario      @relation(fields: [by], references: [id])
+  artigoId   String       @db.ObjectId
+  artigo     Artigo       @relation(fields: [artigoId], references: [id])
+  CommentTwo CommentTwo[]
+}
+
+model CommentTwo {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  dateCreated DateTime @db.Date
+  message     String
+  reaction    Int
+  strike      Int
+
+  by        String     @db.ObjectId
+  usuario   Usuario    @relation(fields: [by], references: [id])
+  commentId String     @db.ObjectId
+  comment   CommentOne @relation(fields: [commentId], references: [id])
+}
+
+model Comunidade {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  comuName    String
+  description String
+  isPublic    Boolean
+  photo       String
+
+  by      String  @db.ObjectId
+  usuario Usuario @relation(fields: [by], references: [id])
+  Post    Post[]
+}
+
+model Post {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  dateCreated DateTime @db.Date
+  message     String
+  reaction    Int
+  strike      Int
+
+  by          String     @db.ObjectId
+  usuario     Usuario    @relation(fields: [by], references: [id])
+  communityId String     @db.ObjectId
+  comunidade  Comunidade @relation(fields: [communityId], references: [id])
+  PostOne     PostOne[]
+}
+
+model PostOne {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  dateCreated DateTime @db.Date
+  message     String
+  reaction    Int
+  strike      Int
+
+  by      String    @db.ObjectId
+  usuario Usuario   @relation(fields: [by], references: [id])
+  postId  String    @db.ObjectId
+  post    Post      @relation(fields: [postId], references: [id])
+  PostTwo PostTwo[]
+}
+
+model PostTwo {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  dateCreated DateTime @db.Date
+  message     String
+  reaction    Int
+  strike      Int
+
+  by            String  @db.ObjectId
+  usuario       Usuario @relation(fields: [by], references: [id])
+  commentPostId String  @db.ObjectId
+  comment       PostOne @relation(fields: [commentPostId], references: [id])
+}

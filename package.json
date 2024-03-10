@@ -1,0 +1,48 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "TCC TOTH",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsx ./src/server.ts",
+    "build": "tsup src",
+    "start": "node dist/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PSjoon/TOTH.git"
+  },
+  "keywords": [
+    "React",
+    "Typescript",
+    "JavaScript",
+    "NextJS"
+  ],
+  "author": "Pedro S.",
+  "license": "SEE LICENSE IN LICENSE",
+  "bugs": {
+    "url": "https://github.com/PSjoon/TOTH/issues"
+  },
+  "homepage": "https://github.com/PSjoon/TOTH#readme",
+  "devDependencies": {
+    "@types/js-cookie": "^3.0.3",
+    "dotenv": "^16.3.1",
+    "prisma": "^5.4.1",
+    "tsup": "^8.0.2",
+    "tsx": "^3.12.7",
+    "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "@fastify/cors": "^8.4.0",
+    "@fastify/jwt": "^7.2.0",
+    "@fastify/multipart": "^7.7.3",
+    "@fastify/static": "^6.10.2",
+    "@prisma/client": "^5.4.1",
+    "@types/node": "^20.4.10",
+    "axios": "^1.4.0",
+    "fastify": "^4.21.0",
+    "fastify-bcrypt": "^1.0.1",
+    "next-auth": "^4.24.3",
+    "zod": "^3.21.4"
+  }
+}
