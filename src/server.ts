@@ -39,11 +39,6 @@ app.register(jwt, {
   secret: "lsdgkdsg5dsgdsghsdlg62023jooniefortoth",
 })
 
-app.get("/", async (req, res) => {
-  console.log("hello World")
-  res.send("Hello World!")
-})
-
 app.register(Perfil)
 app.register(Artigo)
 app.register(Community)
@@ -54,6 +49,11 @@ app.register(linkedinAuth)
 app.register(uploadRoutes)
 app.register(Search)
 app.register(Comment)
+
+app.get("/", async (req, res) => {
+  console.log("Hello World")
+  res.send("Hello World!")
+})
 
 app
   .listen({
