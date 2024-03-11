@@ -1,7 +1,6 @@
 import "dotenv/config"
 
 import fastify from "fastify"
-import { send } from "process"
 
 const app = fastify()
 const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3334

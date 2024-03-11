@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "TCC TOTH",
   "main": "index.js",
+  "engines": {
+    "node": "18"
+  },
   "scripts": {
     "dev": "tsx watch ./api/index.ts",
     "build": "tsup api",
