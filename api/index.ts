@@ -1,19 +1,28 @@
-import "dotenv/config"
+import dotenv from "dotenv"
+import express from "express"
+import bodyParser from "body-parser"
 
-import fastify from "fastify"
+import cors from "cors"
 
-const app = fastify()
+const app = express()
+app.use(cors())
+dotenv.config({ path: "../.env" })
+dotenv.config({})
+
 const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3334
 
+app.use(bodyParser.urlencoded({ extended: true }))
+app.use(bodyParser.json())
+
 app.get("/", async (req, res) => {
-  console.log("Hello World")
-  res.send("Hello World!")
+  console.log("hello World")
+  res.json("Hello World!")
 })
 
-app
-  .listen({
-    port,
+try {
+  app.listen(port, () => {
+    console.log(`Servidor iniciado na porta ${port}`)
   })
-  .then(() => {
-    console.log(`hello world in port: ${port}`)
-  })
+} catch (error) {
+  console.log(error)
+}
