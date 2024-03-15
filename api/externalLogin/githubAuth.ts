@@ -70,22 +70,24 @@ export async function githubAuth(app: Express) {
       })
     }
 
-    const token = jwt.sign(
-      {
-        nickname: userGithub.nickname,
-        username: userGithub.username,
-        profilePictures: userGithub.profilePicture,
-      },
-      secret,
-      {
-        subject: userGithub.id,
-        expiresIn: "30 days",
-      }
-    )
-    console.log(token)
-    if (!token) {
-      res.status(404)
+    try {
+      const token = jwt.sign(
+        {
+          nickname: userGithub.nickname,
+          username: userGithub.username,
+          profilePictures: userGithub.profilePicture,
+        },
+        secret,
+        {
+          subject: userGithub.id,
+          expiresIn: "30 days",
+        }
+      )
+      console.log(token)
+      res.send({ token: token })
+    } catch (error) {
+      console.log(error)
+      res.status(405)
     }
-    res.send({ token: token })
   })
 }
