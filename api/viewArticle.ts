@@ -28,7 +28,7 @@ export async function viewArticle(app: Express) {
             by: artigo.by,
             file: artigo.file,
 
-            profilePictures: usuario?.profilePictures,
+            profilePictures: usuario?.profilePicture,
             username: usuario?.username,
             college: usuario?.college,
             email: usuario?.email,
