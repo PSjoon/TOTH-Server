@@ -83,11 +83,11 @@ export async function githubAuth(app: Express) {
           expiresIn: "30 days",
         }
       )
-      console.log(token)
+      // console.log(token)
       res.send({ token: token })
     } catch (error) {
       console.log(error)
-      res.status(405)
+      res.status(404)
     }
   })
 }
