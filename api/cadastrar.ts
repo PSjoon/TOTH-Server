@@ -71,8 +71,8 @@ export async function newUser(app: Express) {
         expiresIn: "30 days",
       }
     )
-    console.log(token)
-    res.send({ token: token })
+    // console.log(token)
+    res.send({ token: token, user: isLog })
   })
 
   app.post("/logar", async (req, res) => {
@@ -114,7 +114,7 @@ export async function newUser(app: Express) {
         res.send({ token: token, user: isRegister })
       }
     } catch {
-      res.status(301)
+      res.status(404)
       return
     }
   })
