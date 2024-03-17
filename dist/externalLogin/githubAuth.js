@@ -16912,69 +16912,12 @@ var require_body_parser = __commonJS({
   }
 });
 
-// api/index.ts
-var api_exports = {};
-__export(api_exports, {
-  comparePassword: () => comparePassword,
-  encryptPassword: () => encryptPassword,
-  secret: () => secret
-});
-module.exports = __toCommonJS(api_exports);
-var import_dotenv = __toESM(require("dotenv"));
-var import_express = __toESM(require("express"));
-var import_body_parser = __toESM(require_body_parser());
-var import_cors = __toESM(require("cors"));
-
-// api/lib/prisma.ts
-var import_client = require("@prisma/client");
-var prisma = new import_client.PrismaClient({
-  log: ["query"]
-});
-
-// api/viewArticle.ts
-function viewArticle(app2) {
-  return __async(this, null, function* () {
-    app2.get("/article", (req, res) => __async(this, null, function* () {
-      try {
-        const artigo = yield prisma.artigo.findMany({
-          orderBy: {
-            dateCreated: "desc"
-          }
-        });
-        const artigoData = yield Promise.all(
-          artigo.map((artigo2) => __async(this, null, function* () {
-            const usuario = yield prisma.usuario.findUnique({
-              where: {
-                id: artigo2.by
-              }
-            });
-            return {
-              id: artigo2.id,
-              dateCreated: artigo2.dateCreated,
-              photo: artigo2.photo,
-              reaction: artigo2.reaction,
-              text: artigo2.text,
-              title: artigo2.title,
-              by: artigo2.by,
-              file: artigo2.file,
-              profilePictures: usuario == null ? void 0 : usuario.profilePicture,
-              username: usuario == null ? void 0 : usuario.username,
-              college: usuario == null ? void 0 : usuario.college,
-              email: usuario == null ? void 0 : usuario.email,
-              savedPosts: usuario == null ? void 0 : usuario.savedPosts
-            };
-          }))
-        );
-        res.send({ artigoData });
-      } catch (error) {
-        res.status(404);
-        res.send(error);
-      }
-    }));
-  });
-}
-
 // api/externalLogin/githubAuth.ts
+var githubAuth_exports = {};
+__export(githubAuth_exports, {
+  githubAuth: () => githubAuth
+});
+module.exports = __toCommonJS(githubAuth_exports);
 var import_axios = __toESM(require("axios"));
 
 // node_modules/zod/lib/index.mjs
@@ -20615,8 +20558,204 @@ var z = /* @__PURE__ */ Object.freeze({
   ZodError
 });
 
+// api/lib/prisma.ts
+var import_client = require("@prisma/client");
+var prisma = new import_client.PrismaClient({
+  log: ["query"]
+});
+
 // api/externalLogin/githubAuth.ts
+var import_jsonwebtoken2 = __toESM(require("jsonwebtoken"));
+
+// api/index.ts
+var import_dotenv = __toESM(require("dotenv"));
+var import_express = __toESM(require("express"));
+var import_body_parser = __toESM(require_body_parser());
+var import_cors = __toESM(require("cors"));
+
+// api/viewArticle.ts
+function viewArticle(app2) {
+  return __async(this, null, function* () {
+    app2.get("/article", (req, res) => __async(this, null, function* () {
+      try {
+        const artigo = yield prisma.artigo.findMany({
+          orderBy: {
+            dateCreated: "desc"
+          }
+        });
+        const artigoData = yield Promise.all(
+          artigo.map((artigo2) => __async(this, null, function* () {
+            const usuario = yield prisma.usuario.findUnique({
+              where: {
+                id: artigo2.by
+              }
+            });
+            return {
+              id: artigo2.id,
+              dateCreated: artigo2.dateCreated,
+              photo: artigo2.photo,
+              reaction: artigo2.reaction,
+              text: artigo2.text,
+              title: artigo2.title,
+              by: artigo2.by,
+              file: artigo2.file,
+              profilePictures: usuario == null ? void 0 : usuario.profilePicture,
+              username: usuario == null ? void 0 : usuario.username,
+              college: usuario == null ? void 0 : usuario.college,
+              email: usuario == null ? void 0 : usuario.email,
+              savedPosts: usuario == null ? void 0 : usuario.savedPosts
+            };
+          }))
+        );
+        res.send({ artigoData });
+      } catch (error) {
+        res.status(404);
+        res.send(error);
+      }
+    }));
+  });
+}
+
+// api/index.ts
+var import_bcrypt = __toESM(require("bcrypt"));
+
+// api/cadastrar.ts
 var import_jsonwebtoken = __toESM(require("jsonwebtoken"));
+function newUser(app2) {
+  return __async(this, null, function* () {
+    app2.post("/cadastrar", (req, res) => __async(this, null, function* () {
+      const newUserSchema = z.object({
+        email: z.string(),
+        username: z.string().toLowerCase().transform((name) => {
+          return name.trim().split(" ").map((word) => {
+            return word[0].toLocaleUpperCase().concat(word.substring(1));
+          }).join(" ");
+        }),
+        nickname: z.string(),
+        password: z.string()
+      });
+      const { username, nickname, email, password } = newUserSchema.parse(
+        req.body
+      );
+      const hashPassword = yield encryptPassword(password);
+      let isLog = yield prisma.usuario.findUnique({
+        where: {
+          email
+        }
+      });
+      if (isLog) {
+        res.sendStatus(405);
+        return;
+      }
+      isLog = yield prisma.usuario.create({
+        data: {
+          username,
+          nickname,
+          email,
+          password: hashPassword,
+          college: [""],
+          github: "",
+          githubId: 0,
+          lattes: "",
+          linkedin: "",
+          profilePicture: "http://localhost:3334/uploads/User2.svg",
+          savedPosts: [""],
+          seguidores: [""]
+        }
+      });
+      const token = import_jsonwebtoken.default.sign(
+        {
+          username: isLog.username,
+          nickname: isLog.nickname,
+          profilePictures: isLog.profilePicture
+        },
+        secret,
+        {
+          subject: isLog.id,
+          expiresIn: "30 days"
+        }
+      );
+      res.send({ token, user: isLog });
+    }));
+    app2.post("/logar", (req, res) => __async(this, null, function* () {
+      const logUserSchema = z.object({
+        email: z.string(),
+        password: z.string()
+      });
+      const { email, password } = logUserSchema.parse(req.body);
+      try {
+        const isRegister = yield prisma.usuario.findUnique({
+          where: {
+            email
+          }
+        });
+        if (isRegister) {
+          if (!(yield comparePassword(password, isRegister.password))) {
+            res.status(403);
+          }
+        } else {
+          res.status(404);
+        }
+        if (isRegister) {
+          const token = import_jsonwebtoken.default.sign(
+            {
+              username: isRegister.username,
+              nickname: isRegister.nickname,
+              profilePictures: isRegister.profilePicture
+            },
+            secret,
+            {
+              subject: isRegister.id,
+              expiresIn: "30 days"
+            }
+          );
+          res.send({ token, user: isRegister });
+        }
+      } catch (e) {
+        res.status(404);
+        return;
+      }
+    }));
+  });
+}
+
+// api/index.ts
+var app = (0, import_express.default)();
+app.use((0, import_cors.default)());
+import_dotenv.default.config({ path: "../.env" });
+import_dotenv.default.config({});
+var port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3334;
+var secret = "3iku89e234iku8efgtegijostuw38325te4et24iklou890";
+function encryptPassword(password) {
+  return __async(this, null, function* () {
+    const saltRounds = 12;
+    const hashedPassword = yield import_bcrypt.default.hash(password, saltRounds);
+    return hashedPassword;
+  });
+}
+function comparePassword(inputPassword, hashedPassword) {
+  return __async(this, null, function* () {
+    return yield import_bcrypt.default.compare(inputPassword, hashedPassword);
+  });
+}
+app.use(import_body_parser.default.urlencoded({ extended: true }));
+app.use(import_body_parser.default.json());
+viewArticle(app);
+githubAuth(app);
+newUser(app);
+app.get("/", (req, res) => __async(void 0, null, function* () {
+  console.log("hello World");
+  res.json("Hello World!");
+}));
+try {
+  app.listen(port, () => {
+    console.log(`Servidor iniciado na porta ${port}`);
+  });
+} catch (error) {
+  console.log(error);
+}
+
+// api/externalLogin/githubAuth.ts
 function githubAuth(app2) {
   return __async(this, null, function* () {
     app2.post("/githubauth", (req, res) => __async(this, null, function* () {
@@ -20676,7 +20815,7 @@ function githubAuth(app2) {
         });
       }
       try {
-        const token = import_jsonwebtoken.default.sign(
+        const token = import_jsonwebtoken2.default.sign(
           {
             nickname: userGithub.nickname,
             username: userGithub.username,
@@ -20696,150 +20835,9 @@ function githubAuth(app2) {
     }));
   });
 }
-
-// api/index.ts
-var import_bcrypt = __toESM(require("bcrypt"));
-
-// api/cadastrar.ts
-var import_jsonwebtoken2 = __toESM(require("jsonwebtoken"));
-function newUser(app2) {
-  return __async(this, null, function* () {
-    app2.post("/cadastrar", (req, res) => __async(this, null, function* () {
-      const newUserSchema = z.object({
-        email: z.string(),
-        username: z.string().toLowerCase().transform((name) => {
-          return name.trim().split(" ").map((word) => {
-            return word[0].toLocaleUpperCase().concat(word.substring(1));
-          }).join(" ");
-        }),
-        nickname: z.string(),
-        password: z.string()
-      });
-      const { username, nickname, email, password } = newUserSchema.parse(
-        req.body
-      );
-      const hashPassword = yield encryptPassword(password);
-      let isLog = yield prisma.usuario.findUnique({
-        where: {
-          email
-        }
-      });
-      if (isLog) {
-        res.sendStatus(405);
-        return;
-      }
-      isLog = yield prisma.usuario.create({
-        data: {
-          username,
-          nickname,
-          email,
-          password: hashPassword,
-          college: [""],
-          github: "",
-          githubId: 0,
-          lattes: "",
-          linkedin: "",
-          profilePicture: "http://localhost:3334/uploads/User2.svg",
-          savedPosts: [""],
-          seguidores: [""]
-        }
-      });
-      const token = import_jsonwebtoken2.default.sign(
-        {
-          username: isLog.username,
-          nickname: isLog.nickname,
-          profilePictures: isLog.profilePicture
-        },
-        secret,
-        {
-          subject: isLog.id,
-          expiresIn: "30 days"
-        }
-      );
-      res.send({ token, user: isLog });
-    }));
-    app2.post("/logar", (req, res) => __async(this, null, function* () {
-      const logUserSchema = z.object({
-        email: z.string(),
-        password: z.string()
-      });
-      const { email, password } = logUserSchema.parse(req.body);
-      try {
-        const isRegister = yield prisma.usuario.findUnique({
-          where: {
-            email
-          }
-        });
-        if (isRegister) {
-          if (!(yield comparePassword(password, isRegister.password))) {
-            res.status(403);
-          }
-        } else {
-          res.status(404);
-        }
-        if (isRegister) {
-          const token = import_jsonwebtoken2.default.sign(
-            {
-              username: isRegister.username,
-              nickname: isRegister.nickname,
-              profilePictures: isRegister.profilePicture
-            },
-            secret,
-            {
-              subject: isRegister.id,
-              expiresIn: "30 days"
-            }
-          );
-          res.send({ token, user: isRegister });
-        }
-      } catch (e) {
-        res.status(404);
-        return;
-      }
-    }));
-  });
-}
-
-// api/index.ts
-var app = (0, import_express.default)();
-app.use((0, import_cors.default)());
-import_dotenv.default.config({ path: "../.env" });
-import_dotenv.default.config({});
-var port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3334;
-var secret = "3iku89e234iku8efgtegijostuw38325te4et24iklou890";
-function encryptPassword(password) {
-  return __async(this, null, function* () {
-    const saltRounds = 12;
-    const hashedPassword = yield import_bcrypt.default.hash(password, saltRounds);
-    return hashedPassword;
-  });
-}
-function comparePassword(inputPassword, hashedPassword) {
-  return __async(this, null, function* () {
-    return yield import_bcrypt.default.compare(inputPassword, hashedPassword);
-  });
-}
-app.use(import_body_parser.default.urlencoded({ extended: true }));
-app.use(import_body_parser.default.json());
-viewArticle(app);
-githubAuth(app);
-newUser(app);
-app.get("/", (req, res) => __async(void 0, null, function* () {
-  console.log("hello World");
-  res.json("Hello World!");
-}));
-try {
-  app.listen(port, () => {
-    console.log(`Servidor iniciado na porta ${port}`);
-  });
-} catch (error) {
-  console.log(error);
-}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  comparePassword,
-  encryptPassword,
-  secret
+  githubAuth
 });
 /*! Bundled license information:
 

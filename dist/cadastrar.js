@@ -16912,70 +16912,12 @@ var require_body_parser = __commonJS({
   }
 });
 
-// api/index.ts
-var api_exports = {};
-__export(api_exports, {
-  comparePassword: () => comparePassword,
-  encryptPassword: () => encryptPassword,
-  secret: () => secret
+// api/cadastrar.ts
+var cadastrar_exports = {};
+__export(cadastrar_exports, {
+  newUser: () => newUser
 });
-module.exports = __toCommonJS(api_exports);
-var import_dotenv = __toESM(require("dotenv"));
-var import_express = __toESM(require("express"));
-var import_body_parser = __toESM(require_body_parser());
-var import_cors = __toESM(require("cors"));
-
-// api/lib/prisma.ts
-var import_client = require("@prisma/client");
-var prisma = new import_client.PrismaClient({
-  log: ["query"]
-});
-
-// api/viewArticle.ts
-function viewArticle(app2) {
-  return __async(this, null, function* () {
-    app2.get("/article", (req, res) => __async(this, null, function* () {
-      try {
-        const artigo = yield prisma.artigo.findMany({
-          orderBy: {
-            dateCreated: "desc"
-          }
-        });
-        const artigoData = yield Promise.all(
-          artigo.map((artigo2) => __async(this, null, function* () {
-            const usuario = yield prisma.usuario.findUnique({
-              where: {
-                id: artigo2.by
-              }
-            });
-            return {
-              id: artigo2.id,
-              dateCreated: artigo2.dateCreated,
-              photo: artigo2.photo,
-              reaction: artigo2.reaction,
-              text: artigo2.text,
-              title: artigo2.title,
-              by: artigo2.by,
-              file: artigo2.file,
-              profilePictures: usuario == null ? void 0 : usuario.profilePicture,
-              username: usuario == null ? void 0 : usuario.username,
-              college: usuario == null ? void 0 : usuario.college,
-              email: usuario == null ? void 0 : usuario.email,
-              savedPosts: usuario == null ? void 0 : usuario.savedPosts
-            };
-          }))
-        );
-        res.send({ artigoData });
-      } catch (error) {
-        res.status(404);
-        res.send(error);
-      }
-    }));
-  });
-}
-
-// api/externalLogin/githubAuth.ts
-var import_axios = __toESM(require("axios"));
+module.exports = __toCommonJS(cadastrar_exports);
 
 // node_modules/zod/lib/index.mjs
 var util;
@@ -20615,7 +20557,66 @@ var z = /* @__PURE__ */ Object.freeze({
   ZodError
 });
 
+// api/lib/prisma.ts
+var import_client = require("@prisma/client");
+var prisma = new import_client.PrismaClient({
+  log: ["query"]
+});
+
+// api/cadastrar.ts
+var import_jsonwebtoken2 = __toESM(require("jsonwebtoken"));
+
+// api/index.ts
+var import_dotenv = __toESM(require("dotenv"));
+var import_express = __toESM(require("express"));
+var import_body_parser = __toESM(require_body_parser());
+var import_cors = __toESM(require("cors"));
+
+// api/viewArticle.ts
+function viewArticle(app2) {
+  return __async(this, null, function* () {
+    app2.get("/article", (req, res) => __async(this, null, function* () {
+      try {
+        const artigo = yield prisma.artigo.findMany({
+          orderBy: {
+            dateCreated: "desc"
+          }
+        });
+        const artigoData = yield Promise.all(
+          artigo.map((artigo2) => __async(this, null, function* () {
+            const usuario = yield prisma.usuario.findUnique({
+              where: {
+                id: artigo2.by
+              }
+            });
+            return {
+              id: artigo2.id,
+              dateCreated: artigo2.dateCreated,
+              photo: artigo2.photo,
+              reaction: artigo2.reaction,
+              text: artigo2.text,
+              title: artigo2.title,
+              by: artigo2.by,
+              file: artigo2.file,
+              profilePictures: usuario == null ? void 0 : usuario.profilePicture,
+              username: usuario == null ? void 0 : usuario.username,
+              college: usuario == null ? void 0 : usuario.college,
+              email: usuario == null ? void 0 : usuario.email,
+              savedPosts: usuario == null ? void 0 : usuario.savedPosts
+            };
+          }))
+        );
+        res.send({ artigoData });
+      } catch (error) {
+        res.status(404);
+        res.send(error);
+      }
+    }));
+  });
+}
+
 // api/externalLogin/githubAuth.ts
+var import_axios = __toESM(require("axios"));
 var import_jsonwebtoken = __toESM(require("jsonwebtoken"));
 function githubAuth(app2) {
   return __async(this, null, function* () {
@@ -20699,9 +20700,42 @@ function githubAuth(app2) {
 
 // api/index.ts
 var import_bcrypt = __toESM(require("bcrypt"));
+var app = (0, import_express.default)();
+app.use((0, import_cors.default)());
+import_dotenv.default.config({ path: "../.env" });
+import_dotenv.default.config({});
+var port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3334;
+var secret = "3iku89e234iku8efgtegijostuw38325te4et24iklou890";
+function encryptPassword(password) {
+  return __async(this, null, function* () {
+    const saltRounds = 12;
+    const hashedPassword = yield import_bcrypt.default.hash(password, saltRounds);
+    return hashedPassword;
+  });
+}
+function comparePassword(inputPassword, hashedPassword) {
+  return __async(this, null, function* () {
+    return yield import_bcrypt.default.compare(inputPassword, hashedPassword);
+  });
+}
+app.use(import_body_parser.default.urlencoded({ extended: true }));
+app.use(import_body_parser.default.json());
+viewArticle(app);
+githubAuth(app);
+newUser(app);
+app.get("/", (req, res) => __async(void 0, null, function* () {
+  console.log("hello World");
+  res.json("Hello World!");
+}));
+try {
+  app.listen(port, () => {
+    console.log(`Servidor iniciado na porta ${port}`);
+  });
+} catch (error) {
+  console.log(error);
+}
 
 // api/cadastrar.ts
-var import_jsonwebtoken2 = __toESM(require("jsonwebtoken"));
 function newUser(app2) {
   return __async(this, null, function* () {
     app2.post("/cadastrar", (req, res) => __async(this, null, function* () {
@@ -20799,47 +20833,9 @@ function newUser(app2) {
     }));
   });
 }
-
-// api/index.ts
-var app = (0, import_express.default)();
-app.use((0, import_cors.default)());
-import_dotenv.default.config({ path: "../.env" });
-import_dotenv.default.config({});
-var port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3334;
-var secret = "3iku89e234iku8efgtegijostuw38325te4et24iklou890";
-function encryptPassword(password) {
-  return __async(this, null, function* () {
-    const saltRounds = 12;
-    const hashedPassword = yield import_bcrypt.default.hash(password, saltRounds);
-    return hashedPassword;
-  });
-}
-function comparePassword(inputPassword, hashedPassword) {
-  return __async(this, null, function* () {
-    return yield import_bcrypt.default.compare(inputPassword, hashedPassword);
-  });
-}
-app.use(import_body_parser.default.urlencoded({ extended: true }));
-app.use(import_body_parser.default.json());
-viewArticle(app);
-githubAuth(app);
-newUser(app);
-app.get("/", (req, res) => __async(void 0, null, function* () {
-  console.log("hello World");
-  res.json("Hello World!");
-}));
-try {
-  app.listen(port, () => {
-    console.log(`Servidor iniciado na porta ${port}`);
-  });
-} catch (error) {
-  console.log(error);
-}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  comparePassword,
-  encryptPassword,
-  secret
+  newUser
 });
 /*! Bundled license information:
 
