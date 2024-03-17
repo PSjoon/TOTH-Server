@@ -10,9 +10,11 @@ export async function githubAuth(app: Express) {
     const bodySchemaGitHub = z.object({
       code: z.string(),
     })
+    console.log(2)
     const { code } = bodySchemaGitHub.parse(req.body)
 
     console.log(code)
+    console.log(3)
 
     const accessTokenResponse = await axios.post(
       "https://github.com/login/oauth/access_token",
